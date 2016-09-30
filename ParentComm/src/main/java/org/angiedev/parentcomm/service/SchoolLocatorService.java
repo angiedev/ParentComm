@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolLevel;
-import org.angiedev.parentcomm.web.form.AddressForm;
 
 /**
  * SchoolLocatorService is a interface for a service which enables a user to find 
