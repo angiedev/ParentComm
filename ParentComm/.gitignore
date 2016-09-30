@@ -1,0 +1,6 @@
+/build/
+/target/
+/src/main/resources/database/jdbc.properties
+/src/main/resources/ParentComm.properties
+.DS_Store
+/.settings
