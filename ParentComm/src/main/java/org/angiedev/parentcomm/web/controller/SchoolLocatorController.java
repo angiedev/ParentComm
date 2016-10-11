@@ -4,6 +4,7 @@ import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolLevel;
 import org.angiedev.parentcomm.service.SchoolLocatorService;
 import org.angiedev.parentcomm.web.form.AddressForm;
+import org.angiedev.parentcomm.web.form.SchoolNameForm;
 import org.angiedev.parentcomm.web.form.SelectSchoolForm;
 
 import java.util.List;
@@ -26,44 +27,90 @@ public class SchoolLocatorController {
 	
 	@Autowired 
 	private SchoolLocatorService schoolLocatorService;
-
-	private final int SEARCH_RADIUS = 2; // Hard coded now; will be configuratble in future
+	
 	
 	/**
-	 * Redirects the user to a page which enables a user to enter an address
+	 * Directs the user to a page which enables a user to enter a school name
+	 * to locate a school with a matching name near by 
 	 * @return ModelAndView object for address view and supporting address object
 	 */
-	@RequestMapping (value="/", method=RequestMethod.GET)
+	@RequestMapping (value="/inputName", method=RequestMethod.GET)
+	public ModelAndView getSchool() {
+		ModelAndView mav = new ModelAndView();
+		SchoolNameForm form = new SchoolNameForm();
+		form.setSchoolName("");
+		mav.addObject("school",form);
+		mav.setViewName("getSchool");
+		return mav;
+	}
+
+	/*
+	 * Directs the user to a page which enables a user to enter an address
+	 * to locate a school near by 
+	 * @return ModelAndView object for address view and supporting address object
+	 */
+	
+	@RequestMapping (value="/inputAddress", method=RequestMethod.GET)
 	public ModelAndView address() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("address", new AddressForm());
 		mav.setViewName("getAddress");
 		return mav;
 	}
+	
 
 	/**
 	 * Retrieves the schools located near the passed in address and redirects user
-	 * to a page which enable a user to select a school
+	 * to a page which enable a user to select the appropriate school
 	 * @param address 	street address being searched near 
 	 * @param session	http session required to store search results
 	 * @return			ModelAndView object for selectSchool view and supporting 
 	 * 					schoolForm object and list of schools
 	 */
-	@RequestMapping (value="findSchools", method=RequestMethod.POST)
+	@RequestMapping (value="findSchoolsByAddress", method=RequestMethod.POST)
 	public ModelAndView findSchoolsBasedOnAddress(@ModelAttribute("address") AddressForm address,
 			HttpSession session) {
 	
 		ModelAndView mav = null;
+		int searchRadius = 5; // hard code for now
 		
-		if (address.getLatitude().equals("") | address.getLongitude().equals("")) {
-			mav = new ModelAndView("redirect:/");
+		if (address.getLatitude().equals("") || address.getLongitude().equals("")) {
+			mav = new ModelAndView("redirect:/inputAddress");
 			mav.addObject("address", new AddressForm());
 		} else {
 			mav = new ModelAndView();
 			List<School> schools = schoolLocatorService.findSchoolsByGeoLocation(
 					Double.parseDouble(address.getLatitude()), 
 					Double.parseDouble(address.getLongitude()), 
-					SEARCH_RADIUS);
+					searchRadius);
+			mav.addObject("schools",schools);
+			mav.addObject("selectSchoolForm", new SelectSchoolForm()); 
+			mav.setViewName("selectSchool");
+			
+			session.setAttribute("schoolSearchResult", schools);
+		}
+		return mav;
+	}
+
+	@RequestMapping (value="findSchoolsByName", method=RequestMethod.POST)
+	public ModelAndView findSchoolsBasedOnName(@ModelAttribute("name") SchoolNameForm nameForm,
+			HttpSession session) {
+	
+		ModelAndView mav = null;
+		int searchRadius = 15; // hard code for now
+		
+		if (nameForm.getSchoolName().equals("") ||
+			nameForm.getLatitude().equals("") ||
+			nameForm.getLongitude().equals("")) {
+			mav = new ModelAndView("redirect:/inputName");
+			mav.addObject("school", new SchoolNameForm());
+		} else {
+			mav = new ModelAndView();
+			List<School> schools = schoolLocatorService.findSchoolsByNameAndGeoLocation(
+					nameForm.getSchoolName(),
+					Double.parseDouble(nameForm.getLatitude()), 
+					Double.parseDouble(nameForm.getLongitude()), 
+					searchRadius);
 			mav.addObject("schools",schools);
 			mav.addObject("selectSchoolForm", new SelectSchoolForm()); 
 			mav.setViewName("selectSchool");
@@ -106,7 +153,6 @@ public class SchoolLocatorController {
 		return mav;		
 	}
 	
-	/*
 	@RequestMapping (value="selectSchool", method=RequestMethod.POST)
 	public ModelAndView selectSchool(@ModelAttribute("selectSchoolForm") SelectSchoolForm form) {
 		System.out.println("forwarding to select class");
@@ -115,7 +161,6 @@ public class SchoolLocatorController {
 		// TBD
 		return mav;
 	}
-	*/
 	
 	
 }

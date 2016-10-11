@@ -20,20 +20,32 @@ import org.springframework.web.client.RestTemplate;
 public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 
 	private final String SEARCH_URL = "http://localhost:8080/SchoolFinder/schools?";
+	private final String SEARCH_STRING_PARAM = "searchString=";
 	private final String LAT_PARAM = "lat=";
 	private final String LONG_PARAM = "long=";
 	private final String RADIUS_PARAM = "searchRadius=";
+	private final String ORDER_BY_PARAM = "orderBy=";
 	
-	/**
-	 * Retrieves a list of schools near a passed in address
-	 * @param address	address to search near.
-	 * @return			list of schools near the passed in address
-	 */
+	
 	@Override
 	public List<School> findSchoolsByGeoLocation(double latitude, double longitude, int searchRadius) {
 		
 		String query = SEARCH_URL + LAT_PARAM  + latitude + "&" +
-				LONG_PARAM + longitude + "&" + RADIUS_PARAM +  searchRadius; 
+				LONG_PARAM + longitude + "&" + RADIUS_PARAM +  searchRadius + 
+				"&" + ORDER_BY_PARAM + "BY_DISTANCE"; 
+		
+		RestTemplate rest = new RestTemplate();
+		School[] schools = rest.getForObject(query, School[].class);
+		return Arrays.asList(schools);
+	}
+	
+	@Override
+	public List<School> findSchoolsByNameAndGeoLocation(String name, double latitude, double longitude,
+			int searchRadius) {
+		
+		String query = SEARCH_URL + SEARCH_STRING_PARAM + name + "&" + LAT_PARAM  + latitude + "&" +
+				LONG_PARAM + longitude + "&" + RADIUS_PARAM +  searchRadius +
+				"&" + ORDER_BY_PARAM + "BY_DISTANCE"; 
 		
 		RestTemplate rest = new RestTemplate();
 		School[] schools = rest.getForObject(query, School[].class);
@@ -123,4 +135,6 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 		
 		return gradeValue;
 	}
+
+	
 }

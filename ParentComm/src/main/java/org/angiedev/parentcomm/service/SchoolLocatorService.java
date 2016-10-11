@@ -24,6 +24,17 @@ public interface SchoolLocatorService {
 			int searchRadius);
 	
 	/**
+	 * Retrieves a list of schools near a passed in geo-location with a matching name.
+	 * @param name 			name to match school against
+	 * @param latitude		latitude of location to search near.
+	 * @param longitude		longitude of location to search near.
+	 * @param searchRadius	distance in miles to search withing
+	 * @return				list of schools near the passed in address
+	 */
+	public List<School> findSchoolsByNameAndGeoLocation(String name, double latitude,
+			double longitude, int searchRadius);
+		
+	/**
 	 * Filters a list of schools based on the passed in school level.
 	 * <p>
 	 * If a user is filtering by ELEMENTARY then all schools with a grade of 
