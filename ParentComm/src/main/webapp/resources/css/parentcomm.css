@@ -49,10 +49,11 @@ div.school-select {
     text-align: center;
 }
 
-button.school-select {
-	white-space: normal;
+.button {
+	display: block;
 	width: 280px;
 	height: 100px;
+	white-space: normal;
 	
 }
 

@@ -5,7 +5,6 @@ import org.angiedev.parentcomm.model.SchoolLevel;
 import org.angiedev.parentcomm.service.SchoolLocatorService;
 import org.angiedev.parentcomm.web.form.AddressForm;
 import org.angiedev.parentcomm.web.form.SchoolNameForm;
-import org.angiedev.parentcomm.web.form.SelectSchoolForm;
 
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -20,10 +19,12 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * SchoolLocatorController handles requests to search for schools and filters the results.
- * @author angie
+ * @author Angela Gordon
  */
+
 @Controller
-public class SchoolLocatorController {
+@RequestMapping("/schools")
+public class SchoolSelectorController {
 	
 	@Autowired 
 	private SchoolLocatorService schoolLocatorService;
@@ -37,14 +38,12 @@ public class SchoolLocatorController {
 	@RequestMapping (value="/inputName", method=RequestMethod.GET)
 	public ModelAndView getSchool() {
 		ModelAndView mav = new ModelAndView();
-		SchoolNameForm form = new SchoolNameForm();
-		form.setSchoolName("");
-		mav.addObject("school",form);
-		mav.setViewName("getSchool");
+		mav.addObject("school", new SchoolNameForm());
+		mav.setViewName("getSchoolName");
 		return mav;
 	}
 
-	/*
+	/**
 	 * Directs the user to a page which enables a user to enter an address
 	 * to locate a school near by 
 	 * @return ModelAndView object for address view and supporting address object
@@ -61,60 +60,59 @@ public class SchoolLocatorController {
 
 	/**
 	 * Retrieves the schools located near the passed in address and redirects user
-	 * to a page which enable a user to select the appropriate school
+	 * to a page which enables a user to select their school
 	 * @param address 	street address being searched near 
 	 * @param session	http session required to store search results
 	 * @return			ModelAndView object for selectSchool view and supporting 
 	 * 					schoolForm object and list of schools
 	 */
-	@RequestMapping (value="findSchoolsByAddress", method=RequestMethod.POST)
+	@RequestMapping (value="findByAddress", method=RequestMethod.POST)
 	public ModelAndView findSchoolsBasedOnAddress(@ModelAttribute("address") AddressForm address,
 			HttpSession session) {
 	
-		ModelAndView mav = null;
+		ModelAndView mav = new ModelAndView();
 		int searchRadius = 5; // hard code for now
 		
+		// if no geo location data found ask user to reenter an address
 		if (address.getLatitude().equals("") || address.getLongitude().equals("")) {
-			mav = new ModelAndView("redirect:/inputAddress");
 			mav.addObject("address", new AddressForm());
+			mav.setViewName("getAddress");
 		} else {
-			mav = new ModelAndView();
 			List<School> schools = schoolLocatorService.findSchoolsByGeoLocation(
 					Double.parseDouble(address.getLatitude()), 
 					Double.parseDouble(address.getLongitude()), 
 					searchRadius);
 			mav.addObject("schools",schools);
-			mav.addObject("selectSchoolForm", new SelectSchoolForm()); 
 			mav.setViewName("selectSchool");
-			
+			// save set of schools in session to support filtering operation
 			session.setAttribute("schoolSearchResult", schools);
 		}
 		return mav;
 	}
 
-	@RequestMapping (value="findSchoolsByName", method=RequestMethod.POST)
+	@RequestMapping (value="findByName", method=RequestMethod.POST)
 	public ModelAndView findSchoolsBasedOnName(@ModelAttribute("name") SchoolNameForm nameForm,
 			HttpSession session) {
 	
-		ModelAndView mav = null;
+		ModelAndView mav = new ModelAndView();
 		int searchRadius = 15; // hard code for now
 		
+		// if no school name was entered or no geolocation data was obtained then 
+		// ask user to enter school name again 
 		if (nameForm.getSchoolName().equals("") ||
 			nameForm.getLatitude().equals("") ||
 			nameForm.getLongitude().equals("")) {
-			mav = new ModelAndView("redirect:/inputName");
 			mav.addObject("school", new SchoolNameForm());
+			mav.setViewName("getSchoolName");
 		} else {
-			mav = new ModelAndView();
 			List<School> schools = schoolLocatorService.findSchoolsByNameAndGeoLocation(
 					nameForm.getSchoolName(),
 					Double.parseDouble(nameForm.getLatitude()), 
 					Double.parseDouble(nameForm.getLongitude()), 
 					searchRadius);
 			mav.addObject("schools",schools);
-			mav.addObject("selectSchoolForm", new SelectSchoolForm()); 
 			mav.setViewName("selectSchool");
-			
+			// save set of schools in session to support filtering operation
 			session.setAttribute("schoolSearchResult", schools);
 		}
 		return mav;
@@ -124,27 +122,21 @@ public class SchoolLocatorController {
 	@RequestMapping(value="selectSchool", method=RequestMethod.POST, params = {"filterType"} )
 	public ModelAndView filterSchools(@RequestParam() String filterType, HttpSession session) {
 		
-		ModelAndView mav = null;
+		ModelAndView mav = new ModelAndView();
 		
 		// get previous search results since user must want to filter results
 		List<School> schools = 
 			(List<School>)session.getAttribute("schoolSearchResult");
 	
-		// if no results available take user back to page to input address
+		// if no results available take user back to page to input school name
 		if (schools == null) {
-			mav = new ModelAndView("redirect:/");
-			mav.addObject("address", new AddressForm());
+			mav.addObject("school", new SchoolNameForm());
+			mav.setViewName("getSchoolName");
 		} else {
-			SelectSchoolForm form = new SelectSchoolForm();
-			form.setFilterType(filterType);
-			
-			mav = new ModelAndView();
-			mav.addObject("selectSchoolForm",form);
 			mav.setViewName("selectSchool");
 			
 			if (filterType.equals("ALL")) {
 				mav.addObject("schools", schools);
-				
 			} else {
 				mav.addObject("schools",
 					schoolLocatorService.filterSchoolsByType(schools, SchoolLevel.valueOf(filterType) ));
@@ -152,15 +144,4 @@ public class SchoolLocatorController {
 		}
 		return mav;		
 	}
-	
-	@RequestMapping (value="selectSchool", method=RequestMethod.POST)
-	public ModelAndView selectSchool(@ModelAttribute("selectSchoolForm") SelectSchoolForm form) {
-		System.out.println("forwarding to select class");
-		ModelAndView mav = new ModelAndView();
-		mav.setViewName("selectClass");
-		// TBD
-		return mav;
-	}
-	
-	
 }

@@ -7,7 +7,6 @@ public class SchoolNameForm {
 	private String longitude;
 	
 	public SchoolNameForm() {
-		
 	}
 
 	public String getSchoolName() {

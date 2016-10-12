@@ -7,7 +7,7 @@ package org.angiedev.parentcomm.model;
 public class School {
 
 	protected String name;
-	protected String id;
+	protected long id;
 	protected String address;
 	protected String lowGrade;  // lowest grade at school
 	protected String highGrade; // highest grade at school
@@ -20,11 +20,11 @@ public class School {
 		this.name = name;
 	}
 
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(long id) {
 		this.id =id;
 	}
 
@@ -52,13 +52,14 @@ public class School {
 		this.highGrade = highGrade;
 	}
 
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((address == null) ? 0 : address.hashCode());
 		result = prime * result + ((highGrade == null) ? 0 : highGrade.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((lowGrade == null) ? 0 : lowGrade.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
@@ -83,10 +84,7 @@ public class School {
 				return false;
 		} else if (!highGrade.equals(other.highGrade))
 			return false;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
+		if (id != other.id)
 			return false;
 		if (lowGrade == null) {
 			if (other.lowGrade != null)
@@ -100,7 +98,7 @@ public class School {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "School [name=" + name + ", id=" + id + ", address=" + address + ", lowGrade=" + lowGrade

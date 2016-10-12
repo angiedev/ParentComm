@@ -20,8 +20,8 @@ public class SchoolFinderSchool extends School {
 	
 	@JsonCreator
 	public SchoolFinderSchool(@JsonProperty("name") String name,
-			@JsonProperty("ncesId") String id,
-			@JsonProperty("streetAddr") String address,
+			@JsonProperty("schoolId") long id,
+			@JsonProperty("streetAddr") String streetAddress,
 			@JsonProperty("city") String city,
 			@JsonProperty("state") String state,
 			@JsonProperty("zip") String zip,
@@ -30,7 +30,7 @@ public class SchoolFinderSchool extends School {
 		
 		this.name = name;
 		this.id = id;
-		this.address = address + "," + city + "," + state + "," + zip;	
+		this.address = streetAddress + ", " + city + ", " + state + ", " + zip;	
 		this.lowGrade = lowGrade;
 		this.highGrade = highGrade;
 	}

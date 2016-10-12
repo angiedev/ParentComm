@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolLevel;
+import org.angiedev.parentcomm.service.impl.json.SchoolFinderSchool;
 import org.angiedev.parentcomm.service.SchoolLocatorService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -31,12 +32,9 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 	public List<School> findSchoolsByGeoLocation(double latitude, double longitude, int searchRadius) {
 		
 		String query = SEARCH_URL + LAT_PARAM  + latitude + "&" +
-				LONG_PARAM + longitude + "&" + RADIUS_PARAM +  searchRadius + 
-				"&" + ORDER_BY_PARAM + "BY_DISTANCE"; 
-		
-		RestTemplate rest = new RestTemplate();
-		School[] schools = rest.getForObject(query, School[].class);
-		return Arrays.asList(schools);
+						LONG_PARAM + longitude + "&" + RADIUS_PARAM +  searchRadius + 
+						"&" + ORDER_BY_PARAM + "BY_DISTANCE"; 
+		return getSchools(query);
 	}
 	
 	@Override
@@ -46,10 +44,19 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 		String query = SEARCH_URL + SEARCH_STRING_PARAM + name + "&" + LAT_PARAM  + latitude + "&" +
 				LONG_PARAM + longitude + "&" + RADIUS_PARAM +  searchRadius +
 				"&" + ORDER_BY_PARAM + "BY_DISTANCE"; 
-		
+		return getSchools(query);
+	}
+	
+	/* helper method to execute query against DB and return list of schools */
+	private List<School> getSchools(String query) {
+		List<School> resultList = new ArrayList<School>();
 		RestTemplate rest = new RestTemplate();
-		School[] schools = rest.getForObject(query, School[].class);
-		return Arrays.asList(schools);
+		
+		SchoolFinderSchool[] schools = rest.getForObject(query, SchoolFinderSchool[].class);
+		for (SchoolFinderSchool s: schools) {
+			resultList.add(s);
+		}
+		return resultList;
 	}
 	
 	/**

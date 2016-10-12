@@ -1,9 +1,7 @@
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="sf"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
 <!DOCTYPE html>
 <html lang="en">
-
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -27,8 +25,8 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
   </head>
-
-<body>
+  
+  <body>
 
     <!-- Navigation -->
     <nav class="navbar navbar-default navbar-fixed-top topnav" role="navigation">
@@ -61,37 +59,31 @@
         </div>
         <!-- /.container -->
     </nav>
-
-
-    <!-- Header -->
     <div class="intro-header">
         <div class="container">
-
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="intro-message">
-                        <h1>Connect with School Parents</h1>
-                        <h3>Enter you address to find the schools closest to you</h3>
-                        <hr class="intro-divider">
-                        
-                        <sf:form modelAttribute="address" action="findByAddress" method="POST" >
-                        <div class="form-group">
-                       	<sf:input path="streetAddress" class="form-control" placeholder="Enter your street address"/>
-                       	</div>
-                       	<div>
-                       	<img src="resources/img/google/powered_by_google_on_non_white.png" class="pull-right" >
-                       	</div>
-                       	<div class="form-group">
-                       		<button type="submit" class="btn btn-primary">Find Schools</button>
-                       	</div>
-                        <sf:hidden path="longitude"/>
-                        <sf:hidden path="latitude"/>
-      				
-                        </sf:form>
-                      
-                    </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="intro-message">
+                    <h1>Connect with School Parents</h1>
+                    <h3>Enter the name of your school</h3>
+                    <hr class="intro-divider">
+                    
+                    <sf:form modelAttribute="school" action="findByName" method="POST" >
+                    	<div class="form-group">
+                     	<sf:input list="schoolList" path="schoolName" class="form-control" 
+                     		placeholder="School name"></sf:input>
+                     	<datalist id="schoolList">
+                    		</datalist>
+                    	</div>
+                    	<div class="form-group">
+                   			<button type="submit" name="selectSchool" class="btn btn-primary">Select School</button>
+                   		</div>                  
+               		<sf:hidden path="longitude"/>
+                     <sf:hidden path="latitude"/>
+                    </sf:form>
                 </div>
             </div>
+        </div>
         </div>
         <!-- /.container -->
     </div>
@@ -102,48 +94,46 @@
      <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src=<c:url value="/resources/js/bootstrap.min.js"/>></script>
     
-    <!-- Included to support google autocomplete map api  -->  
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAzyqOF3t-dgy3uun3Y_ZI7r3SK0nxxlro&libraries=places&callback=initAutocomplete"
-        async defer></script>
-    
     <script>
-    function initAutocomplete() {
-       		 // Create the autocomplete object, restricting the search to geographical
-       		 // location types.
-       		 autocomplete = new google.maps.places.Autocomplete(
-            /** @type {!HTMLInputElement} */(document.getElementById('streetAddress')),
-            {types: ['geocode']}); 
-       		 
-       		 autocomplete.addListener('place_changed', collectLongitudeAndLatitude);
-    	}
     
-    function collectLongitudeAndLatitude() {
-    	var place = autocomplete.getPlace();
-    	$("#latitude").val(place.geometry.location.lat());
-    	$("#longitude").val(place.geometry.location.lng());
-    }
-    
-    $(document).ready(function(){
-     	$(document).on("focus", '#streetAddress', function() {
-     	    // Bias the autocomplete object to the user's geographical location,
-            // as supplied by the browser's 'navigator.geolocation' object.
-     		if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                  var geolocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                  };
-                  var circle = new google.maps.Circle({
-                    center: geolocation,
-                    radius: position.coords.accuracy
-                  });
-                  autocomplete.setBounds(circle.getBounds());
-                });
-              }
-     	});
+    // When page loads get user's geolocation from browser
+    $(document).ready(function() {
+       	if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(showNearbySchools);
+		} else {
+			alert("Please insure to enable your browser to share your geolocation.")
+		}
     });
+    
+    // Once geolocation is retrieved populate list of schools nearby the user
+	function showNearbySchools(position) {
+		var latitudeVal = position.coords.latitude;
+	    var longitudeVal = position.coords.longitude;
+	    $("#latitude").val(latitudeVal);
+	    $("#longitude").val(longitudeVal);
+		$.ajax({type: "GET",
+       			url: "http://localhost:8080/SchoolFinder/schools?lat=" + latitudeVal + "&long=" + 
+       					longitudeVal + "&searchRadius=5&orderBy=BY_NAME",
+       			success: function(data){
+       				buildDropdown(data);
+       			}});
+	}
+	
+    // populates datalist with school names near user
+   	function buildDropdown(result){
+       	var dataList = $("#schoolList");
+		dataList.empty();
+    
+        if (result != '')
+        {
+            // Loop through each of the results and append the option to the dropdown
+            $.each(result, function(k, v) {
+                dataList.append('<option value="' + v.name + '">' + v.name + '</option>');
+            });
+        }
+    }
     </script>
-  
+	
 </body>
 
 </html>
