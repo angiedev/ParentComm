@@ -1,13 +1,12 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<%@page language="java" pageEncoding="UTF-8" session="false"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="sf"%>
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-	<title>Select Your School</title>
+	<title>Find Your School</title>
    	
    	   <!-- Bootstrap -->
    <link href=<c:url value="/resources/css/bootstrap.min.css" /> rel="stylesheet">
@@ -18,41 +17,60 @@
 </head>
 <body>
 	<div class="container">
-	<div class="page-header">Pick your school</div>
+	<div class="page-header">Find your school</div>
 	<form action="selectSchool" method="POST" >
 		<div class="row">
-			<div class="col-xs-3 school-filter">
-				<button type="submit" name="filterType" class="btn btn-info" value="ELEMENTARY">            
+			<div class="col-xs-4 filter">
+				<c:choose>
+				    <c:when test='${filterType == "ELEMENTARY"}'> 
+				    	<c:set var="btnColorClass" value="btn-success"/>
+				    </c:when>
+				    <c:otherwise>
+				       <c:set var="btnColorClass" value="btn-info"/>
+				    </c:otherwise>
+			    </c:choose>
+			    
+				<button type="submit" name="filterType" class="btn ${btnColorClass} btn-med btn-block filter-school" value="ELEMENTARY">            
 				Elementary <br> (K-5)
 				</button>      
 			</div>
 		
-			<div class="col-xs-3 school-filter">
-				<button type="submit" name="filterType" class="btn btn-info" value="INTERMEDIATE">
+			<div class="col-xs-4 filter">
+				<c:choose>
+				     <c:when test='${filterType == "INTERMEDIATE"}'> 
+				    	<c:set var="btnColorClass" value="btn-success"/>
+				    </c:when>
+				    <c:otherwise>
+				       <c:set var="btnColorClass" value="btn-info"/>
+				    </c:otherwise>
+			    </c:choose>
+				<button type="submit" name="filterType" class="btn ${btnColorClass} btn-med btn-block filter-school" value="INTERMEDIATE">
 				Intermediate <br> (6-8)
 				</button>  
 			</div>
 		
-			<div class="col-xs-3 school-filter">
-				<button type="submit" name="filterType" class="btn btn-info" value="HIGH">   
+			<div class="col-xs-4 filter">
+				<c:choose>
+				    <c:when test='${filterType == "HIGH"}'> 
+				    	<c:set var="btnColorClass" value="btn-success"/>
+				    </c:when>
+				    <c:otherwise>
+				       <c:set var="btnColorClass" value="btn-info"/>
+				    </c:otherwise>
+			    </c:choose>
+				<button type="submit" name="filterType" class="btn ${btnColorClass} btn-med btn-block filter-school" value="HIGH">   
 				High <br>(9-12)
 				</button>
 			</div>
 		
-			<div class="col-xs-3 school-filter">
-				<button type="submit" name="filterType" class="btn btn-info"  value="ALL">   
-				All <br>
-				Schools
-				</button>  
-			</div>
 		</div>
 	
 		<div class="row">
 			<c:forEach var="school" items="${schools}">
-				<div class="col-lg-3 col-md-4 col-sm-6 school-select">
+				<div class="col-lg-3 col-md-4 col-sm-6 select">
 				
-				<a href=<c:url value="/classes?schoolId=${school.getId()}"/> class="btn btn-primary btn-lg button active">
-				${school.getName()}
+				<a href=<c:url value="/classes?schoolId=${school.id}"/> class="btn btn-primary btn-lg school">
+				${school.name}
 				</a>
 			
 				</div>

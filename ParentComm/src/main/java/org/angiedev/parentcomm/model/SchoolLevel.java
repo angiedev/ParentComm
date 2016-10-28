@@ -6,5 +6,7 @@ package org.angiedev.parentcomm.model;
  *
  */
 public enum SchoolLevel {
-	ELEMENTARY, INTERMEDIATE, HIGH
+	ELEMENTARY, 
+	INTERMEDIATE, 
+	HIGH
 }

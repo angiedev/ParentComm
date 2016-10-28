@@ -9,6 +9,7 @@ package org.angiedev.parentcomm.service.impl.json;
  * @author Angela Gordon 
  */
 import org.angiedev.parentcomm.model.School;
+import org.angiedev.parentcomm.model.SchoolGrade;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,7 +21,7 @@ public class SchoolFinderSchool extends School {
 	
 	@JsonCreator
 	public SchoolFinderSchool(@JsonProperty("name") String name,
-			@JsonProperty("schoolId") long id,
+			@JsonProperty("ncesId") String id,
 			@JsonProperty("streetAddr") String streetAddress,
 			@JsonProperty("city") String city,
 			@JsonProperty("state") String state,
@@ -30,9 +31,12 @@ public class SchoolFinderSchool extends School {
 		
 		this.name = name;
 		this.id = id;
-		this.address = streetAddress + ", " + city + ", " + state + ", " + zip;	
-		this.lowGrade = lowGrade;
-		this.highGrade = highGrade;
+		this.streetAddress = streetAddress;
+		this.city = city;
+		this.state = state;
+		this.zip = zip;	
+		this.lowGrade = SchoolGrade.getSchoolGrade(lowGrade);
+		this.highGrade = SchoolGrade.getSchoolGrade(highGrade);
 	}
 
 }

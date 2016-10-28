@@ -33,8 +33,19 @@ public class Props {
 		}
 	}
 	
-	public String getGoogleAPIKey() {
-		return (properties == null) ? null : properties.getProperty("GOOGLE_API_KEY");
+	public String getGoogleGeoCodeAPIKey() {
+		return (properties == null) ? null : properties.getProperty("GOOGLE_GEOCODE_API_KEY");
 	}
 	
+	public String getGoogleAutocompleteAPIKey() {
+		return (properties == null) ? null : properties.getProperty("GOOGLE_AUTOCOMPLETE_API_KEY");
+	}
+	
+	public int getSearchRadiusForNameSearch() {
+		return (properties == null) ? 0 : Integer.parseInt(properties.getProperty("SEARCH_RADIUS_BY_NAME"));
+	}
+	public int getSearchRadiusForAddressSearch() {
+		return (properties == null) ? 0 : Integer.parseInt(properties.getProperty("SEARCH_RADIUS_BY_ADDRESS"));
+	}
+
 }

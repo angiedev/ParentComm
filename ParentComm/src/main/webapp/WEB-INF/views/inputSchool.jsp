@@ -1,7 +1,9 @@
+<%@page language="java" pageEncoding="UTF-8" session="false"%>
+<%@ page import="org.angiedev.parentcomm.util.Props" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="sf"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -15,7 +17,12 @@
  	<!-- Custom CSS -->    
     <link href=<c:url value="/resources/css/parentcomm.css"/> rel="stylesheet">
     
-    <!-- Custom Fonts -->
+    <!-- Included to support google autocomplete map api  -->  
+    <script src="https://maps.googleapis.com/maps/api/js?key=${Props.getInstance().getGoogleAutocompleteAPIKey()}&libraries=places&callback=initAutocomplete"
+        async defer></script>
+    
+    
+	    <!-- Custom Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -65,18 +72,24 @@
             <div class="col-lg-12">
                 <div class="intro-message">
                     <h1>Connect with School Parents</h1>
-                    <h3>Enter the name of your school</h3>
+                    <h3>Enter the name of your school or nearby address</h3>
                     <hr class="intro-divider">
+                    <c:if test="${error == 'GEOLOCATION_DISABLED'}">
+	                    <span class="text-primary">Please enable location tracking on your browser to continue</span>
+                    </c:if>
+                    <c:if test="${error == 'INVALID_ADDRESS'}">
+	                    <span class="text-primary">Please enter a valid address</span>
+                    </c:if>
                     
-                    <sf:form modelAttribute="school" action="findByName" method="POST" >
+                    <sf:form id="findSchoolForm" modelAttribute="finderForm" action="findSchool" method="POST" >
                     	<div class="form-group">
-                     	<sf:input list="schoolList" path="schoolName" class="form-control" 
-                     		placeholder="School name"></sf:input>
+                     	<sf:input list="schoolList" path="searchValue" class="form-control" 
+                     		placeholder="School name or nearby address"></sf:input>
                      	<datalist id="schoolList">
                     		</datalist>
                     	</div>
                     	<div class="form-group">
-                   			<button type="submit" name="selectSchool" class="btn btn-primary">Select School</button>
+                   			<button type="submit" id="searchButton" name="searchButton" class="btn btn-primary" >Find School</button>
                    		</div>                  
                		<sf:hidden path="longitude"/>
                      <sf:hidden path="latitude"/>
@@ -94,32 +107,75 @@
      <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src=<c:url value="/resources/js/bootstrap.min.js"/>></script>
     
-    <script>
+ <script>
     
-    // When page loads get user's geolocation from browser
-    $(document).ready(function() {
-       	if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(showNearbySchools);
-		} else {
-			alert("Please insure to enable your browser to share your geolocation.")
-		}
-    });
+    var service;
     
-    // Once geolocation is retrieved populate list of schools nearby the user
-	function showNearbySchools(position) {
+    function initAutocomplete() {
+    	 service = new google.maps.places.AutocompleteService();
+    	 
+    	 if (navigator.geolocation) {
+ 			navigator.geolocation.getCurrentPosition(getLatAndLong);
+ 		} else {
+ 			alert("Please insure to enable your browser to share your geolocation.")
+ 		}
+        	
+        	if ( $('#searchValue').val().length < 3 ) {
+    	    	$('#searchButton').prop("disabled", true);
+    	    }
+        	
+        	$('#findSchoolForm').submit(function( event) {
+        		if ( $('#searchValue').val().length < 3) {
+        			event.preventDefault();
+        		}
+        	});
+   
+        	
+        // Only allow a user to submit the form if at least 3 characters are entered in input box
+     	$('#searchValue').bind('input', function() {
+        		var firstCharValue = $(this).val().trim().charCodeAt(0);
+        	
+        		// If first char is a digit (0 thru 9)
+        	    if ( (firstCharValue >= 48) && (firstCharValue <= 57)) {
+        	    	showNearbyAddresses($(this).val());
+        	    } else {
+        	    	showNearbySchoolsByName($(this).val());
+        	    }
+        	    if ($(this).val().length >= 3) {
+        	    	$('#searchButton').prop("disabled", false);
+        	    } else {
+        	    	$('#searchButton').prop("disabled", true);
+        	    }
+        	});
+
+    }
+    
+    function getLatAndLong(position) {
 		var latitudeVal = position.coords.latitude;
 	    var longitudeVal = position.coords.longitude;
 	    $("#latitude").val(latitudeVal);
 	    $("#longitude").val(longitudeVal);
-		$.ajax({type: "GET",
-       			url: "http://localhost:8080/SchoolFinder/schools?lat=" + latitudeVal + "&long=" + 
-       					longitudeVal + "&searchRadius=5&orderBy=BY_NAME",
-       			success: function(data){
-       				buildDropdown(data);
-       			}});
 	}
-	
-    // populates datalist with school names near user
+    
+    // Populates datalist with matching addresses near user's location
+    function showNearbyAddresses(address) {
+    	var latitudeVal = $("#latitude").val();
+    	var longitudeVal = $("#longitude").val();
+    	service.getPlacePredictions({input: $('#searchValue').val()},
+    		function(predictions, status){
+    			if(status=='OK'){
+    				var dataList = $("#schoolList");
+    				dataList.empty();
+        	        for(var i=0;i< 5;++i){
+        	        	if (predictions[i]){
+        	        		dataList.append('<option value="' + predictions[i].description + '">' +  predictions[i].description + '</option>');
+        	        	}
+    				}
+    			}
+    		});
+    }
+    
+ 	// populates datalist with school names near user
    	function buildDropdown(result){
        	var dataList = $("#schoolList");
 		dataList.empty();
@@ -128,11 +184,26 @@
         {
             // Loop through each of the results and append the option to the dropdown
             $.each(result, function(k, v) {
-                dataList.append('<option value="' + v.name + '">' + v.name + '</option>');
+                dataList.append('<option value="' +  v.name + '">' +  v.name + '</option>');
             });
         }
     }
-    </script>
+ 	
+ // Populates datalist with matching schools near user's location
+   	function showNearbySchoolsByName(name) {
+    	var latitudeVal = $("#latitude").val();
+    	var longitudeVal = $("#longitude").val();
+    	if ((latitudeVal != "") && (longitudeVal != "")) {
+    		$.ajax({type: "GET",
+   				url: "http://localhost:8080/SchoolFinder/schools/search?lat=" + latitudeVal + "&long=" + 
+				longitudeVal + "&searchString=" + name + 
+				"&searchRadius=${Props.getInstance().getSearchRadiusForNameSearch()}&maxNumResults=10",
+				success: function(data){
+					buildDropdown(data);
+				}});
+    	}
+	}
+</script>
 	
 </body>
 

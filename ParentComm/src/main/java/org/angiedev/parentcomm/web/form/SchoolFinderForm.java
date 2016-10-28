@@ -1,20 +1,20 @@
 package org.angiedev.parentcomm.web.form;
 
-public class SchoolNameForm {
+public class SchoolFinderForm {
 
-	private String schoolName;
+	private String searchValue;
 	private String latitude;
 	private String longitude;
 	
-	public SchoolNameForm() {
+	public SchoolFinderForm() {
 	}
 
-	public String getSchoolName() {
-		return schoolName;
+	public String getSearchValue() {
+		return searchValue;
 	}
 
-	public void setSchoolName(String schoolName) {
-		this.schoolName = schoolName;
+	public void setSearchValue(String searchValue) {
+		this.searchValue = searchValue;
 	}
 
 	public String getLatitude() {

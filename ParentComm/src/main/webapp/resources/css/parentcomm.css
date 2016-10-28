@@ -32,6 +32,9 @@ input {
     background-size: cover;
 }
 
+.page-header {
+	font-size: 20px;
+}
 .intro-message {
     position: relative;
     padding-top: 20%;
@@ -44,20 +47,24 @@ input {
     font-size: 5em;
 }
 
-div.school-select {
+div.select {
 	padding: 10px;
-    text-align: center;
 }
 
-.button {
-	display: block;
+a.school {
+	display: table-cell;
 	width: 280px;
 	height: 100px;
 	white-space: normal;
-	
+	text-align: center;
+	vertical-align: middle;
 }
 
-div.school-filter {
-	text-align: center;
+div.filter {
 	padding-bottom: 30px;
 }
+
+.school-name {
+	font-size: 14px;
+}
+

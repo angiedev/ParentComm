@@ -1,12 +1,15 @@
 package org.angiedev.parentcomm.service.impl;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolLevel;
 import org.angiedev.parentcomm.service.impl.json.SchoolFinderSchool;
+import org.angiedev.parentcomm.service.impl.json.GoogleGeocodingLookupResult;
+import org.angiedev.parentcomm.model.GeoLocation;
+import org.angiedev.parentcomm.util.Props;
 import org.angiedev.parentcomm.service.SchoolLocatorService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,31 +23,50 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 
-	private final String SEARCH_URL = "http://localhost:8080/SchoolFinder/schools?";
+	private final String SCHOOL_FINDER_SERVICE_URL = "http://localhost:8080/SchoolFinder/schools";
+	private final String SEARCH_REQUEST = "search";
 	private final String SEARCH_STRING_PARAM = "searchString=";
 	private final String LAT_PARAM = "lat=";
 	private final String LONG_PARAM = "long=";
 	private final String RADIUS_PARAM = "searchRadius=";
-	private final String ORDER_BY_PARAM = "orderBy=";
-	
+	private final String MAX_RESULTS_PARAM = "maxNumResults=";
+	private static final String GEOCODE_LOOKUP_URL = "https://maps.googleapis.com/maps/api/geocode/json?";
+	private static final String ADDRESS_KEY_PARAM = "address=";
+	private static final String GEOCODE_API_KEY_PARAM = "key=" + Props.getInstance().getGoogleGeoCodeAPIKey();
+
 	
 	@Override
-	public List<School> findSchoolsByGeoLocation(double latitude, double longitude, int searchRadius) {
+	public List<School> findSchoolsByGeoLocation(double latitude, double longitude, int searchRadius,
+			int maxNumResults) {
 		
-		String query = SEARCH_URL + LAT_PARAM  + latitude + "&" +
-						LONG_PARAM + longitude + "&" + RADIUS_PARAM +  searchRadius + 
-						"&" + ORDER_BY_PARAM + "BY_DISTANCE"; 
+		String query = SCHOOL_FINDER_SERVICE_URL + "/" + SEARCH_REQUEST + "?" +
+						LAT_PARAM  + latitude + "&" +
+						LONG_PARAM + longitude + "&" + 
+						RADIUS_PARAM +  searchRadius + "&" + 
+						MAX_RESULTS_PARAM + maxNumResults; 
 		return getSchools(query);
 	}
 	
 	@Override
 	public List<School> findSchoolsByNameAndGeoLocation(String name, double latitude, double longitude,
-			int searchRadius) {
+			int searchRadius, int maxNumResults) {
 		
-		String query = SEARCH_URL + SEARCH_STRING_PARAM + name + "&" + LAT_PARAM  + latitude + "&" +
-				LONG_PARAM + longitude + "&" + RADIUS_PARAM +  searchRadius +
-				"&" + ORDER_BY_PARAM + "BY_DISTANCE"; 
+		String query = SCHOOL_FINDER_SERVICE_URL + "/" + SEARCH_REQUEST + "?" +
+				SEARCH_STRING_PARAM + name + "&" + 
+				LAT_PARAM  + latitude + "&" +
+				LONG_PARAM + longitude + "&" + 
+				RADIUS_PARAM +  searchRadius +"&" + 
+				MAX_RESULTS_PARAM + maxNumResults; 
 		return getSchools(query);
+	}
+
+	@Override
+	public School getSchoolByNcesId(String ncesId) {
+
+		String query = SCHOOL_FINDER_SERVICE_URL + "/" + ncesId;
+		RestTemplate rest = new RestTemplate();
+		SchoolFinderSchool school = rest.getForObject(query, SchoolFinderSchool.class);
+		return school;
 	}
 	
 	/* helper method to execute query against DB and return list of schools */
@@ -61,16 +83,6 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 	
 	/**
 	 * Filters a list of schools based on the passed in school level.
-	 * <p>
-	 * If a user is filtering by ELEMENTARY then all schools with a grade of 
-	 * PK, KG, 1, 2, 3, 4, or 5 it will be included in the results.
-	 * <p>
-	 * If a user is filtering by MIDDLE then all schools with a grade of 
-	 * 6, 7, or 8 will be included in the results.
-	 * <p>
-	 * If a user is filtering by HIGH then all schools with a grade of 
-	 * 9, 10, 11, or 12 will be included in the results.
-	 *<p>
 	 * @param schools		list of schools to filter
 	 * @param schoolLevel	level of school to look for (ie. ELEMENTARY, MIDDLE, HIGH)
 	 * @return				list of schools having grades in the passed in school level
@@ -82,28 +94,20 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 		
 		for (School school: schools) {
 			
-			int lowGrade = getIntegerValueForGrade(school.getLowGrade());
-			int highGrade = getIntegerValueForGrade(school.getHighGrade());
-		
-			// ignore schools that have a grade value were are not interested in
-			if (( lowGrade == -1) || (highGrade == -1)) {
-				break;
-			}
-			
 			switch (schoolLevel) {
 			  	case ELEMENTARY: 
-			  		if (lowGrade <= 5) {
+			  		if (school.getLowGrade().isElementary()) {
 			  			filteredList.add(school);
-			  		} 
+			  		}
 			  		break;
 			  	case INTERMEDIATE:
-			  		if ( ((lowGrade >= 6) && (lowGrade < 9)) ||
-			  			((highGrade >=6) && (highGrade < 9)) ) {
+			  		if (school.getLowGrade().isIntermediate() ||
+			  			school.getHighGrade().isIntermediate()) {
 			  			filteredList.add(school);
 			  		}
 			  		break;
 			  	case HIGH:  
-			  		if (highGrade >= 9) {
+			  		if (school.getHighGrade().isHigh()) {
 			  			filteredList.add(school);
 			  		}
 			  		break;
@@ -112,36 +116,34 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 				
 		return filteredList;
 	}	
+	
+	/**
+	  * Calls the google geo code service to look up the geo location for the passed in address
+	  * @param address 		street address
+	  * @param city 		city	
+	  * @param stateCode 	two letter state code
+	  * @return 			geo location of address
+	  */
+	 public GeoLocation getGeoLocationForAddress(String address)
+	 	throws IOException {
 		
+		String query = GEOCODE_LOOKUP_URL + ADDRESS_KEY_PARAM + address +  "&" + GEOCODE_API_KEY_PARAM;
 		
+		RestTemplate restTemplate = new RestTemplate();
+		GoogleGeocodingLookupResult result = 
+				restTemplate.getForObject(query, GoogleGeocodingLookupResult.class);
 		
-	/* 
-	 * Converts a string grade value to an integer value.
-	 * Returns a -1 value for schools that should be ignored.
-	 * (Schools that should be ignored either no students, are 
-	 * ungraded or have another unexpected non-numerical value.
-	 */
-	private int getIntegerValueForGrade(String grade) {
-		
-		int gradeValue; 
-		
-		// If school has no students or is ungraded then we are not interested in 
-		// this school 
-		if (grade.equals("N") || grade.equals( "UG")) {
-		    gradeValue =  -1;
-		} else if (grade.equals("PK") || grade.equals("KG")) {
-		    gradeValue = 0;
-		} else {
-			try{
-		       gradeValue = Integer.parseInt(grade);
-			} catch (NumberFormatException e) {
-				// if its not a valid number grade then we will ignore it
-				gradeValue = -1;
-			}
-		}   
-		
-		return gradeValue;
+		switch (result.getStatus()) {
+			case "OK":
+				return result.getGeoLocation();
+			case "ZERO_RESULTS":
+				return null;
+			default:
+				throw new IOException("Unable to get GeoLocation for address: " + address 
+						+ ".  GeoCode API returned status: " + result.getStatus());
+		}
 	}
+	
 
 	
 }

@@ -1,7 +1,9 @@
 package org.angiedev.parentcomm.service;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.angiedev.parentcomm.model.GeoLocation;
 import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolLevel;
 
@@ -17,23 +19,33 @@ public interface SchoolLocatorService {
 	 * Retrieves a list of schools near a passed in geo-location.
 	 * @param latitude		latitude of location to search near.
 	 * @param longitude		longitude of location to search near.
-	 * @param searchRadius	distance in miles to search withing
+	 * @param searchRadius	distance in miles to search within
+	 * @param maxNumResults	maximum number of schools to return
 	 * @return				list of schools near the passed in address
 	 */
 	public List<School> findSchoolsByGeoLocation(double latitude, double longitude,
-			int searchRadius);
+			int searchRadius, int maxNumResults);
 	
 	/**
 	 * Retrieves a list of schools near a passed in geo-location with a matching name.
 	 * @param name 			name to match school against
 	 * @param latitude		latitude of location to search near.
 	 * @param longitude		longitude of location to search near.
-	 * @param searchRadius	distance in miles to search withing
+	 * @param searchRadius	distance in miles to search within
+	 * @param maxNumResults	maximum number of schools to return
 	 * @return				list of schools near the passed in address
 	 */
 	public List<School> findSchoolsByNameAndGeoLocation(String name, double latitude,
-			double longitude, int searchRadius);
-		
+			double longitude, int searchRadius, int maxNumResults);
+	
+	/**
+	 * Retrieves the school identified by the passed in NCES id
+	 * @param ncesId	unique NCES id identifying the school 
+	 *                  (Id assigned by the National Center for Education Statistics)
+	 * @return			school with the passed in NCES Id
+     */
+	public School getSchoolByNcesId(String ncesId);
+	
 	/**
 	 * Filters a list of schools based on the passed in school level.
 	 * <p>
@@ -53,5 +65,14 @@ public interface SchoolLocatorService {
 	 * @return				list of schools having grades in the passed in school level
 	 */
 	public List<School> filterSchoolsByType(List<School> schools, SchoolLevel schoolLevel);
+	
+	/**
+	 * Returns the GeoLocation (latitude/longitude) for the passed in address 
+	 * @param address	address to find geolocation for
+	 * @return 			GeoLocation of the address
+	 * @throws IOException
+	 */
+	public GeoLocation getGeoLocationForAddress(String address)
+			 	throws IOException;
 
 }
