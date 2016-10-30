@@ -25,7 +25,9 @@ public class GoogleGeocodingLookupResult {
 	public GoogleGeocodingLookupResult(@JsonProperty("status") String status,
 			@JsonProperty("results") List<GoogleGeoLocation> geoLocationData) {
 		this.setStatus(status);
-		this.setGeoLocation(geoLocationData.get(0));
+	    if (geoLocationData.size() > 0) {
+		   this.setGeoLocation(geoLocationData.get(0));
+	    }
 	}
 
 	public String getStatus() {

@@ -136,8 +136,6 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 		switch (result.getStatus()) {
 			case "OK":
 				return result.getGeoLocation();
-			case "ZERO_RESULTS":
-				return null;
 			default:
 				throw new IOException("Unable to get GeoLocation for address: " + address 
 						+ ".  GeoCode API returned status: " + result.getStatus());

@@ -92,7 +92,7 @@ public class SchoolSelectorController {
 		if (errorStr != null) {
 			mav.addObject("school", new SchoolFinderForm());
 			mav.addObject("error", errorStr);
-			mav.setViewName("getSchoolNameOrAddress");
+			mav.setViewName("inputSchool");
 		} else {
 		 	// save set of schools in session to support filtering operation
 			session.setAttribute("schoolSearchResult", schools);
