@@ -3,8 +3,7 @@ package org.angiedev.parentcomm.util;
 import java.util.Properties;
 
 import java.io.IOException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 /**
  * Props is a utility class used to retrieve application properties.
  * 
@@ -12,9 +11,9 @@ import org.apache.logging.log4j.Logger;
  */
 public class Props {
 
-	private static final Logger LOGGER = LogManager.getLogger();
 	private static Props instance;
-
+	private static final Logger logger = Logger.getLogger(Props.class);
+	
 	private Properties properties;
 	
 	public static Props getInstance() {
@@ -27,7 +26,7 @@ public class Props {
 				properties = new Properties();
 				properties.load(this.getClass().getResourceAsStream("/ParentComm.properties"));
 			} catch (IOException e) {
-				LOGGER.error("Unable to load Properties:" + e);
+				logger.error("Unable to load Properties:" + e);
 				properties = null;
 			}
 		}
@@ -42,10 +41,10 @@ public class Props {
 	}
 	
 	public int getSearchRadiusForNameSearch() {
-		return (properties == null) ? 0 : Integer.parseInt(properties.getProperty("SEARCH_RADIUS_BY_NAME"));
+		return (properties == null) ? 0 : Integer.parseInt(properties.getProperty("SEARCH_BY_NAME_RADIUS"));
 	}
 	public int getSearchRadiusForAddressSearch() {
-		return (properties == null) ? 0 : Integer.parseInt(properties.getProperty("SEARCH_RADIUS_BY_ADDRESS"));
+		return (properties == null) ? 0 : Integer.parseInt(properties.getProperty("SEARCH_BY_ADDRESS_RADIUS"));
 	}
 
 }

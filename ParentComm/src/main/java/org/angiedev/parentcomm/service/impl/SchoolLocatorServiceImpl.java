@@ -1,16 +1,12 @@
 package org.angiedev.parentcomm.service.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolLevel;
-import org.angiedev.parentcomm.service.impl.json.SchoolFinderSchool;
-import org.angiedev.parentcomm.service.impl.json.GoogleGeocodingLookupResult;
-import org.angiedev.parentcomm.model.GeoLocation;
-import org.angiedev.parentcomm.util.Props;
 import org.angiedev.parentcomm.service.SchoolLocatorService;
+import org.angiedev.parentcomm.service.impl.json.schoolFinder.SchoolFinderSchool;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,9 +26,6 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 	private final String LONG_PARAM = "long=";
 	private final String RADIUS_PARAM = "searchRadius=";
 	private final String MAX_RESULTS_PARAM = "maxNumResults=";
-	private static final String GEOCODE_LOOKUP_URL = "https://maps.googleapis.com/maps/api/geocode/json?";
-	private static final String ADDRESS_KEY_PARAM = "address=";
-	private static final String GEOCODE_API_KEY_PARAM = "key=" + Props.getInstance().getGoogleGeoCodeAPIKey();
 
 	
 	@Override
@@ -116,32 +109,5 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 				
 		return filteredList;
 	}	
-	
-	/**
-	  * Calls the google geo code service to look up the geo location for the passed in address
-	  * @param address 		street address
-	  * @param city 		city	
-	  * @param stateCode 	two letter state code
-	  * @return 			geo location of address
-	  */
-	 public GeoLocation getGeoLocationForAddress(String address)
-	 	throws IOException {
-		
-		String query = GEOCODE_LOOKUP_URL + ADDRESS_KEY_PARAM + address +  "&" + GEOCODE_API_KEY_PARAM;
-		
-		RestTemplate restTemplate = new RestTemplate();
-		GoogleGeocodingLookupResult result = 
-				restTemplate.getForObject(query, GoogleGeocodingLookupResult.class);
-		
-		switch (result.getStatus()) {
-			case "OK":
-				return result.getGeoLocation();
-			default:
-				throw new IOException("Unable to get GeoLocation for address: " + address 
-						+ ".  GeoCode API returned status: " + result.getStatus());
-		}
-	}
-	
-
 	
 }

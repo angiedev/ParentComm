@@ -3,6 +3,7 @@ package org.angiedev.parentcomm.web.controller;
 import org.angiedev.parentcomm.model.GeoLocation;
 import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolLevel;
+import org.angiedev.parentcomm.service.GeoLocatorService;
 import org.angiedev.parentcomm.service.SchoolLocatorService;
 import org.angiedev.parentcomm.util.Props;
 import org.angiedev.parentcomm.web.form.SchoolFinderForm;
@@ -31,60 +32,84 @@ public class SchoolSelectorController {
 	@Autowired 
 	private SchoolLocatorService schoolLocatorService;
 	
+	@Autowired
+	private GeoLocatorService geoLocatorService;
+	
+	private final int MAX_NUM_RESULTS = 100; 
+	
 	/**
-	 * Directs the user to a page which enables a user to enter an address
-	 * to locate a school near by 
+	 * Returns a page to the user which requests the user for either a school name or 
+	 * an address to locate a school nearby 
 	 * @return ModelAndView object for address view and supporting address object
 	 */
-	
-	@RequestMapping (value="input", method=RequestMethod.GET)
+	@RequestMapping (value="find", method=RequestMethod.GET)
 	public ModelAndView nameOrAddress() {
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("finderForm", new SchoolFinderForm());
-		mav.setViewName("inputSchool");
+		mav.setViewName("findSchool");
 		return mav;
 	}
 	
-	@RequestMapping (value="findSchool", method=RequestMethod.POST)
+	/**
+	 * Searches for the school based on the school name or the address the user entered 
+	 * @param finderForm form values on which to base the search 
+	 * @param session session object needed to retain the list of schools found 
+	 *        so that the results can later be filtered by the user 
+	 * @return ModelAndView object showing list of school choices for the user
+	 */
+	@RequestMapping (value="find", method=RequestMethod.POST)
 	public ModelAndView findSchools(@ModelAttribute("finderForm") SchoolFinderForm finderForm,
 			HttpSession session) {
 	
 		ModelAndView mav = new ModelAndView();
 		List<School> schools = null;
-		int maxNumResults = 100;
 		String errorStr = null;	
-			
 		
+			
 		if (Character.isDigit(finderForm.getSearchValue().trim().charAt(0))) {
-			// Assuming address search if search value starts with number
+			// Assume address search if search value starts with number
 			try {
-				GeoLocation geoLocation = schoolLocatorService.
-						getGeoLocationForAddress(finderForm.getSearchValue());
+				// use default search radius if not specified by the user
+				if (finderForm.getRadius() == 0) {
+					finderForm.setRadius(Props.getInstance().getSearchRadiusForAddressSearch());
+				}
+				
+				GeoLocation geoLocation = geoLocatorService.getGeoLocationForAddress(
+						finderForm.getSearchValue());
+				
 				schools = schoolLocatorService.findSchoolsByGeoLocation(
 						geoLocation.getLatitude(), geoLocation.getLongitude(), 
-						Props.getInstance().getSearchRadiusForAddressSearch(), maxNumResults);
+						finderForm.getRadius(), MAX_NUM_RESULTS);
+				
 			} catch (IOException e) {
 				errorStr = "INVALID_ADDRESS";
 			}
+			
 		} else { 
 			// Assuming school name search 
-			if (finderForm.getLatitude().equals("") ||
-				finderForm.getLongitude().equals("")) {
+			if ((finderForm.getLatitude() == 0) ||
+				(finderForm.getLongitude() == 0)) {
 				// require geo location to be sent to narrow down list of schools
 				errorStr = "GEOLOCATION_DISABLED";
+
 			} else {
+				if (finderForm.getRadius() == 0) {
+					finderForm.setRadius(Props.getInstance().getSearchRadiusForNameSearch());
+				}
 				schools = schoolLocatorService.findSchoolsByNameAndGeoLocation(
 					finderForm.getSearchValue(), 
-					Double.parseDouble(finderForm.getLatitude()),
-					Double.parseDouble(finderForm.getLongitude()),
-					Props.getInstance().getSearchRadiusForNameSearch(), maxNumResults);
+					finderForm.getLatitude(),
+					finderForm.getLongitude(),
+					finderForm.getRadius(), MAX_NUM_RESULTS);
 				if (schools.size() == 0) {
 					// If no schools were found then widen search across US
+					finderForm.setMaxRadius();
 					schools = schoolLocatorService.findSchoolsByNameAndGeoLocation(
 							finderForm.getSearchValue(), 
-							Double.parseDouble(finderForm.getLatitude()),
-							Double.parseDouble(finderForm.getLongitude()),
-							10000, maxNumResults);
+							finderForm.getLatitude(),
+							finderForm.getLongitude(),
+							finderForm.getRadius(), MAX_NUM_RESULTS);
+					
 				}
 			}
 		}
@@ -92,22 +117,25 @@ public class SchoolSelectorController {
 		if (errorStr != null) {
 			mav.addObject("school", new SchoolFinderForm());
 			mav.addObject("error", errorStr);
-			mav.setViewName("inputSchool");
+			mav.setViewName("findSchool");
 		} else {
 		 	// save set of schools in session to support filtering operation
 			session.setAttribute("schoolSearchResult", schools);
 			mav.addObject("schools",schools);
+			mav.addObject("finderForm", finderForm);
 			mav.setViewName("selectSchool");
 		}
 		return mav;
 	}
 	
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value="selectSchool", method=RequestMethod.POST, params = {"filterType"} )
-	public ModelAndView filterSchools(@RequestParam() String filterType, HttpSession session) {
+	@RequestMapping(value="select", method=RequestMethod.POST, params = {"filterType"})
+	public ModelAndView filterSchools(@RequestParam("filterType") String filterType,
+			@ModelAttribute("finderForm") SchoolFinderForm finderForm,
+			HttpSession session) {
 		
 		ModelAndView mav = new ModelAndView();
-		
+	
 		// get previous search results since user must want to filter results
 		List<School> schools = 
 			(List<School>)session.getAttribute("schoolSearchResult");
@@ -115,7 +143,7 @@ public class SchoolSelectorController {
 		// if no results available take user back to page to input school name
 		if (schools == null) {
 			mav.addObject("school", new SchoolFinderForm());
-			mav.setViewName("inputSchool");
+			mav.setViewName("findSchool");
 		} else {
 			mav.setViewName("selectSchool");
 			mav.addObject("filterType", filterType);
@@ -123,9 +151,24 @@ public class SchoolSelectorController {
 				mav.addObject("schools", schools);
 			} else {
 				mav.addObject("schools",
-					schoolLocatorService.filterSchoolsByType(schools, SchoolLevel.valueOf(filterType) ));
+					schoolLocatorService.filterSchoolsByType(schools,  SchoolLevel.valueOf(filterType)));
 			}
 		}
+		mav.addObject("finderForm", finderForm);
 		return mav;		
 	}
+	
+	/*
+	@RequestMapping(value="select", method=RequestMethod.POST)
+	public ModelAndView changeSearchRadiusSchools(@RequestParam("radius") int radius, HttpSession session) {
+		
+		ModelAndView mav = new ModelAndView();
+	
+		// get previous search results since user must want to filter results
+		List<School> schools = 
+			(List<School>)session.getAttribute("schoolSearchResult");
+	
+		return mav;		
+	}
+	*/
 }

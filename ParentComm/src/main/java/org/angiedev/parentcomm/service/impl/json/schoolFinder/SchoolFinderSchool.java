@@ -1,4 +1,4 @@
-package org.angiedev.parentcomm.service.impl.json;
+package org.angiedev.parentcomm.service.impl.json.schoolFinder;
 
 /**
  * SchoolFinderSchool is a domain class used to consume the data from the 

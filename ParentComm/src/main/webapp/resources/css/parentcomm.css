@@ -2,6 +2,7 @@ body,
 html {
     width: 100%;
     height: 100%;
+    
 }
 
 body,
@@ -15,16 +16,12 @@ h6 {
     font-weight: 700;
 }
 
-input {
-	color: #ffffff;
-}
-
 .topnav {
     font-size: 14px; 
 }
 
 .intro-header {
-    padding-top: 50px; /* If you're making other pages, make sure there is 50px of padding to make sure the navbar doesn't overlap content! */
+    padding-top: 50px; 
     padding-bottom: 50px;
     text-align: center;
     color: #f8f8f8;
@@ -47,6 +44,7 @@ input {
     font-size: 5em;
 }
 
+
 div.select {
 	padding: 10px;
 }
@@ -60,6 +58,9 @@ a.school {
 	vertical-align: middle;
 }
 
+div.padded {
+	height: 50px;
+}
 div.filter {
 	padding-bottom: 30px;
 }
@@ -68,3 +69,76 @@ div.filter {
 	font-size: 14px;
 }
 
+div.miles {
+	text-align: center;
+	padding-bottom:20px;
+
+}
+
+.toggle_radio{
+  background: #5bc0de;
+  position: relative;
+  margin: 4px auto;
+  overflow: hidden;
+  padding: 0 !important;
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+  position: relative;
+  height: 41px;
+  width: 424px;
+}
+.toggle_radio > * {
+  float: left;
+}
+.toggle_radio input[type=radio]{
+  display: none;
+}
+.toggle_radio label{
+  font: 100%/2.5 "Source Sans Pro";
+  color: rgba(255,255,255,.9);
+  display: block;
+  width: 100px;
+  height: 20px;
+  margin: 3px 3px;
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+  cursor: pointer;
+  z-index: 1;
+  text-align: center;
+}
+
+.toggle_option_slider{
+  width: 100px;
+  height: 33px;
+  position: absolute;
+  top: 4px;
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+  -webkit-transition: all .4s ease;
+  -moz-transition: all .4s ease;
+  -o-transition: all .4s ease;
+  -ms-transition: all .4s ease;
+  transition: all .4s ease;
+}
+
+
+#first_toggle:checked ~ .toggle_option_slider{
+  font-weight: bold;
+  background: rgba(255,255,255,.3);
+  left: 3px;
+}
+#second_toggle:checked ~ .toggle_option_slider{
+  background: rgba(255,255,255,.3);
+  left: 109px;
+}
+#third_toggle:checked ~ .toggle_option_slider{
+  background: rgba(255,255,255,.3);
+  left: 215px;
+}
+#fourth_toggle:checked ~ .toggle_option_slider{
+  background: rgba(255,255,255,.3);
+  left: 321px;
+}

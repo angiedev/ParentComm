@@ -1,10 +1,15 @@
 package org.angiedev.parentcomm.web.form;
 
+import org.angiedev.parentcomm.model.SchoolLevel;
+
 public class SchoolFinderForm {
 
+	public static final int MAX_RADIUS = 1000000;
 	private String searchValue;
-	private String latitude;
-	private String longitude;
+	private double latitude;
+	private double longitude;
+	private int radius; 
+	private SchoolLevel filterType;
 	
 	public SchoolFinderForm() {
 	}
@@ -17,19 +22,39 @@ public class SchoolFinderForm {
 		this.searchValue = searchValue;
 	}
 
-	public String getLatitude() {
+	public double getLatitude() {
 		return latitude;
 	}
 
-	public void setLatitude(String latitude) {
+	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
 
-	public String getLongitude() {
+	public double getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(String longitude) {
+	public void setLongitude(double longitude) {
 		this.longitude = longitude;
+	}
+
+	public int getRadius() {
+		return radius;
+	}
+
+	public void setRadius(int radius) {
+		this.radius = radius;
+	}
+	
+	public void setMaxRadius() {
+		radius = MAX_RADIUS;
+	}
+
+	public SchoolLevel getFilterType() {
+		return filterType;
+	}
+
+	public void setFilterType(SchoolLevel filterType) {
+		this.filterType = filterType;
 	}
 }

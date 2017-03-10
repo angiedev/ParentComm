@@ -1,14 +1,13 @@
 package org.angiedev.parentcomm.service;
 
-import java.io.IOException;
+
 import java.util.List;
 
-import org.angiedev.parentcomm.model.GeoLocation;
 import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolLevel;
 
 /**
- * SchoolLocatorService is a interface for a service which enables a user to find 
+ * SchoolLocatorService defines the interface for a service which enables a user to find 
  * and filter a collection of schools.
  * 
  * @author Angela Gordon
@@ -66,13 +65,5 @@ public interface SchoolLocatorService {
 	 */
 	public List<School> filterSchoolsByType(List<School> schools, SchoolLevel schoolLevel);
 	
-	/**
-	 * Returns the GeoLocation (latitude/longitude) for the passed in address 
-	 * @param address	address to find geolocation for
-	 * @return 			GeoLocation of the address
-	 * @throws IOException
-	 */
-	public GeoLocation getGeoLocationForAddress(String address)
-			 	throws IOException;
-
+	
 }

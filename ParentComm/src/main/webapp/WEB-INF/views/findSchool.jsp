@@ -81,7 +81,7 @@
 	                    <span class="text-primary">Please enter a valid address</span>
                     </c:if>
                     
-                    <sf:form id="findSchoolForm" modelAttribute="finderForm" action="findSchool" method="POST" >
+                    <sf:form id="findSchoolForm" modelAttribute="finderForm" action="find" method="POST" >
                     	<div class="form-group">
                      	<sf:input list="schoolList" path="searchValue" class="form-control" 
                      		placeholder="School name or nearby address"></sf:input>
