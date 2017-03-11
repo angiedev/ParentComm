@@ -1,12 +1,17 @@
 package org.angiedev.parentcomm.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.angiedev.parentcomm.model.GeoLocation;
 import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolLevel;
+import org.angiedev.parentcomm.model.SearchRadius;
+import org.angiedev.parentcomm.service.GeoLocatorService;
 import org.angiedev.parentcomm.service.SchoolLocatorService;
-import org.angiedev.parentcomm.service.impl.json.schoolFinder.SchoolFinderSchool;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,6 +24,9 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 
+	@Autowired
+	private GeoLocatorService geoLocatorService;
+	
 	private final String SCHOOL_FINDER_SERVICE_URL = "http://localhost:8080/SchoolFinder/schools";
 	private final String SEARCH_REQUEST = "search";
 	private final String SEARCH_STRING_PARAM = "searchString=";
@@ -27,28 +35,36 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 	private final String RADIUS_PARAM = "searchRadius=";
 	private final String MAX_RESULTS_PARAM = "maxNumResults=";
 
-	
+
 	@Override
-	public List<School> findSchoolsByGeoLocation(double latitude, double longitude, int searchRadius,
+	public List<School> findSchoolsByGeoLocation(double latitude, double longitude, SearchRadius searchRadius,
 			int maxNumResults) {
 		
 		String query = SCHOOL_FINDER_SERVICE_URL + "/" + SEARCH_REQUEST + "?" +
 						LAT_PARAM  + latitude + "&" +
 						LONG_PARAM + longitude + "&" + 
-						RADIUS_PARAM +  searchRadius + "&" + 
+						RADIUS_PARAM +  searchRadius.getValue() + "&" + 
 						MAX_RESULTS_PARAM + maxNumResults; 
 		return getSchools(query);
 	}
 	
+	@Override 
+	public List<School> findSchoolsByAddress(String address, SearchRadius searchRadius, 
+			int maxNumResults) throws IOException {
+		GeoLocation geoLocation = geoLocatorService.getGeoLocationForAddress(address);
+		return findSchoolsByGeoLocation(geoLocation.getLatitude(), geoLocation.getLongitude(), 
+			searchRadius, maxNumResults);
+	}
+	
 	@Override
 	public List<School> findSchoolsByNameAndGeoLocation(String name, double latitude, double longitude,
-			int searchRadius, int maxNumResults) {
+			SearchRadius searchRadius, int maxNumResults) {
 		
 		String query = SCHOOL_FINDER_SERVICE_URL + "/" + SEARCH_REQUEST + "?" +
 				SEARCH_STRING_PARAM + name + "&" + 
 				LAT_PARAM  + latitude + "&" +
 				LONG_PARAM + longitude + "&" + 
-				RADIUS_PARAM +  searchRadius +"&" + 
+				RADIUS_PARAM +  searchRadius.getValue() +"&" + 
 				MAX_RESULTS_PARAM + maxNumResults; 
 		return getSchools(query);
 	}
@@ -58,7 +74,7 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 
 		String query = SCHOOL_FINDER_SERVICE_URL + "/" + ncesId;
 		RestTemplate rest = new RestTemplate();
-		SchoolFinderSchool school = rest.getForObject(query, SchoolFinderSchool.class);
+		School school = rest.getForObject(query, org.angiedev.parentcomm.service.impl.json.schoolFinder.School.class);
 		return school;
 	}
 	
@@ -67,8 +83,9 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 		List<School> resultList = new ArrayList<School>();
 		RestTemplate rest = new RestTemplate();
 		
-		SchoolFinderSchool[] schools = rest.getForObject(query, SchoolFinderSchool[].class);
-		for (SchoolFinderSchool s: schools) {
+		School[] schools = rest.getForObject(query, 
+				org.angiedev.parentcomm.service.impl.json.schoolFinder.School[].class);
+		for (School s: schools) {
 			resultList.add(s);
 		}
 		return resultList;
@@ -81,7 +98,7 @@ public class SchoolLocatorServiceImpl implements SchoolLocatorService {
 	 * @return				list of schools having grades in the passed in school level
 	 */
 	@Override
-	public List<School> filterSchoolsByType(List<School> schools, SchoolLevel schoolLevel) {
+	public List<School> filterSchoolsBySchoolLevel(List<School> schools, SchoolLevel schoolLevel) {
 		
 		List<School> filteredList = new ArrayList<School>();
 		

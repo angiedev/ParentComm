@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.angiedev.parentcomm.model.SearchRadius;
 import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolGrade;
 import org.angiedev.parentcomm.model.SchoolLevel;
@@ -28,7 +28,7 @@ public class SchoolLocatorServiceImplTest {
 		// Address of Safeway parking lot in Almaden
 		double latitude = 37.219836;
 		double longitude = -121.861611;
-		int searchRadius = 2;
+		SearchRadius searchRadius = SearchRadius.XSMALL;
 		
 		List<School> schools =  service.findSchoolsByGeoLocation(latitude, longitude, searchRadius, 100);
 		
@@ -56,7 +56,7 @@ public class SchoolLocatorServiceImplTest {
 		// Address of Safeway parking lot in Almaden
 		double latitude = 37.219836;
 		double longitude = -121.861611;
-		int searchRadius = 5;
+		SearchRadius searchRadius = SearchRadius.SMALL;
 		
 		List<School> schools = service.findSchoolsByGeoLocation(latitude, longitude, searchRadius, 100);
 		
@@ -99,12 +99,12 @@ public class SchoolLocatorServiceImplTest {
 		// Geolocation of Safeway parking lot in Almaden
 		double latitude = 37.219836;
 		double longitude = -121.861611;
-		int searchRadius = 2;
+		SearchRadius searchRadius = SearchRadius.XSMALL;
 		
 		List<School> schools = service.findSchoolsByGeoLocation(latitude, longitude, searchRadius, 100);
 		
 		// Filter by Elementary
-		List<School> filteredSchools = service.filterSchoolsByType(schools, SchoolLevel.ELEMENTARY);
+		List<School> filteredSchools = service.filterSchoolsBySchoolLevel(schools, SchoolLevel.ELEMENTARY);
 		
 		List<String> filteredSchoolNames = new ArrayList<String>();
 		for (School school: filteredSchools) {
@@ -127,7 +127,7 @@ public class SchoolLocatorServiceImplTest {
 		
 		
 		// Filter by Intermediate
-		filteredSchools = service.filterSchoolsByType(schools, SchoolLevel.INTERMEDIATE);
+		filteredSchools = service.filterSchoolsBySchoolLevel(schools, SchoolLevel.INTERMEDIATE);
 		
 		filteredSchoolNames = new ArrayList<String>();
 		for (School school: filteredSchools) {
@@ -149,7 +149,7 @@ public class SchoolLocatorServiceImplTest {
 		
 
 		// Filter by Intermediate
-		filteredSchools = service.filterSchoolsByType(schools, SchoolLevel.HIGH);
+		filteredSchools = service.filterSchoolsBySchoolLevel(schools, SchoolLevel.HIGH);
 		
 		filteredSchoolNames = new ArrayList<String>();
 		for (School school: filteredSchools) {
@@ -178,7 +178,7 @@ public class SchoolLocatorServiceImplTest {
 		// testing with this school since data shows low grade and high grade with invalid value "M"
 		double latitude = 37.369450;
 		double longitude =-121.836256;
-		int searchRadius = 1;
+		SearchRadius searchRadius = SearchRadius.XSMALL;
 		
 		List<School> schools = service.findSchoolsByGeoLocation(latitude, longitude, searchRadius, 100);
 		
@@ -194,7 +194,7 @@ public class SchoolLocatorServiceImplTest {
 		
 		found = false;
 		// Filter by Elementary
-		List<School> filteredSchools = service.filterSchoolsByType(schools, SchoolLevel.ELEMENTARY);
+		List<School> filteredSchools = service.filterSchoolsBySchoolLevel(schools, SchoolLevel.ELEMENTARY);
 		
 		for (School school: filteredSchools) {
 			if (school.getName().equals("James Mcentee Academy")) {
@@ -206,7 +206,7 @@ public class SchoolLocatorServiceImplTest {
 		
 		found = false;
 		// Filter by Intermediate
-		filteredSchools = service.filterSchoolsByType(schools, SchoolLevel.INTERMEDIATE);
+		filteredSchools = service.filterSchoolsBySchoolLevel(schools, SchoolLevel.INTERMEDIATE);
 		
 		for (School school: filteredSchools) {
 			if (school.getName().equals("James Mcentee Academy")) {
@@ -218,7 +218,7 @@ public class SchoolLocatorServiceImplTest {
 		
 		found = false;
 		// Filter by High
-		filteredSchools = service.filterSchoolsByType(schools, SchoolLevel.HIGH);
+		filteredSchools = service.filterSchoolsBySchoolLevel(schools, SchoolLevel.HIGH);
 		
 		for (School school: filteredSchools) {
 			if (school.getName().equals("James Mcentee Academy")) {
@@ -236,7 +236,7 @@ public class SchoolLocatorServiceImplTest {
 		// testing with this school since data shows low grade and high grade with value "N"
 		double latitude = 37.161973; 
 		double longitude = -118.289459;
-		int searchRadius = 1;
+		SearchRadius searchRadius = SearchRadius.XSMALL;
 		
 		List<School> schools = service.findSchoolsByGeoLocation(latitude, longitude, searchRadius, 100);
 		
@@ -252,7 +252,7 @@ public class SchoolLocatorServiceImplTest {
 		
 		found = false;
 		// Filter by Elementary
-		List<School> filteredSchools = service.filterSchoolsByType(schools, SchoolLevel.ELEMENTARY);
+		List<School> filteredSchools = service.filterSchoolsBySchoolLevel(schools, SchoolLevel.ELEMENTARY);
 		
 		for (School school: filteredSchools) {
 			if (school.getName().equals("Big Pine Academy")) {
@@ -264,7 +264,7 @@ public class SchoolLocatorServiceImplTest {
 		
 		found = false;
 		// Filter by Intermediate
-		filteredSchools = service.filterSchoolsByType(schools, SchoolLevel.INTERMEDIATE);
+		filteredSchools = service.filterSchoolsBySchoolLevel(schools, SchoolLevel.INTERMEDIATE);
 		
 		for (School school: filteredSchools) {
 			if (school.getName().equals("Big Pine Academy")) {
@@ -276,7 +276,7 @@ public class SchoolLocatorServiceImplTest {
 		
 		found = false;
 		// Filter by High
-		filteredSchools = service.filterSchoolsByType(schools, SchoolLevel.HIGH);
+		filteredSchools = service.filterSchoolsBySchoolLevel(schools, SchoolLevel.HIGH);
 		
 		for (School school: filteredSchools) {
 			if (school.getName().equals("Big Pine Academy")) {

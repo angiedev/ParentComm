@@ -1,10 +1,12 @@
 package org.angiedev.parentcomm.service;
 
 
+import java.io.IOException;
 import java.util.List;
 
 import org.angiedev.parentcomm.model.School;
 import org.angiedev.parentcomm.model.SchoolLevel;
+import org.angiedev.parentcomm.model.SearchRadius;
 
 /**
  * SchoolLocatorService defines the interface for a service which enables a user to find 
@@ -20,11 +22,23 @@ public interface SchoolLocatorService {
 	 * @param longitude		longitude of location to search near.
 	 * @param searchRadius	distance in miles to search within
 	 * @param maxNumResults	maximum number of schools to return
-	 * @return				list of schools near the passed in address
+	 * @return				list of schools near the passed in geolocation
 	 */
 	public List<School> findSchoolsByGeoLocation(double latitude, double longitude,
-			int searchRadius, int maxNumResults);
+			SearchRadius searchRadius, int maxNumResults);
 	
+	/**
+	 * Retrieves a list of schools near a passed in address
+	 * @param address		address to search near
+	 * @param searchRadius	distance in miles to search within
+	 * @param maxNumResults maximum number of schools to return
+	 * @return				list of schools near the passed in address
+	 * @throws IOException  thrown for invalid addresses
+	 */
+	public List<School> findSchoolsByAddress(String address, SearchRadius searchRadius,
+			int maxNumResults) throws IOException;
+		
+		
 	/**
 	 * Retrieves a list of schools near a passed in geo-location with a matching name.
 	 * @param name 			name to match school against
@@ -35,7 +49,7 @@ public interface SchoolLocatorService {
 	 * @return				list of schools near the passed in address
 	 */
 	public List<School> findSchoolsByNameAndGeoLocation(String name, double latitude,
-			double longitude, int searchRadius, int maxNumResults);
+			double longitude, SearchRadius searchRadius, int maxNumResults);
 	
 	/**
 	 * Retrieves the school identified by the passed in NCES id
@@ -63,7 +77,7 @@ public interface SchoolLocatorService {
 	 * @param schoolLevel	level of school to look for (ie. ELEMENTARY, MIDDLE, HIGH)
 	 * @return				list of schools having grades in the passed in school level
 	 */
-	public List<School> filterSchoolsByType(List<School> schools, SchoolLevel schoolLevel);
+	public List<School> filterSchoolsBySchoolLevel(List<School> schools, SchoolLevel schoolLevel);
 	
 	
 }

@@ -9,6 +9,13 @@ import org.angiedev.parentcomm.util.Props;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * GoogleGeoLocatorServiceImpl is a service which retrieves a geo location 
+ * for a passed in address. It uses the google maps geocode API.
+ * 
+ * @author Angela Gordon
+ */
+
 @Service
 public class GoogleGeoLocatorServiceImpl implements GeoLocatorService {
 	
@@ -40,7 +47,5 @@ public class GoogleGeoLocatorServiceImpl implements GeoLocatorService {
 						+ ".  GeoCode API returned status: " + result.getStatus());
 		}
 	}
-	
-
 
 }

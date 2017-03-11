@@ -1,7 +1,7 @@
 package org.angiedev.parentcomm.model;
 
 /**
- * School is a data model representing a geo-location for an address.  
+ * GeoLocation is a data model representing a geo-location for an address.  
  * A geo-location is composed of longitude and latitude values.
  * @author Angela Gordon
  */
@@ -14,6 +14,11 @@ public class GeoLocation {
 	 * Default constructor for GeoLocation object
 	 */
 	public GeoLocation() {
+	}
+	
+	public GeoLocation(double latitude, double longitude) {
+		this.latitude = latitude;
+		this.longitude = longitude;
 	}
 	
 	public double getLatitude() {

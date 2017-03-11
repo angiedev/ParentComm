@@ -10,8 +10,12 @@ import java.util.List;
 import org.angiedev.parentcomm.dao.ClassDAO;
 import org.angiedev.parentcomm.model.Class;
 
-@Repository 
+/**
+ * HibernateClassDAO is a hibernate based implementation of the ClassDAO interface.
+ * @author Angela Gordon
+ */
 
+@Repository 
 public class HibernateClassDAO implements ClassDAO {
 
 	@Autowired 

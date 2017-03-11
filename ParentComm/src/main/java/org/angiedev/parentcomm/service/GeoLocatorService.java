@@ -3,7 +3,7 @@ package org.angiedev.parentcomm.service;
 import java.io.IOException;
 
 /**
- * GeoLocatorService defines the interface for a service used to retrieve Geolocation 
+ * GeoLocatorService defines the interface for a service used to retrieve geo location 
  * (latitude/longitude) data for addresses 
  * @author Angela Gordon
  */

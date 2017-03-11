@@ -46,5 +46,4 @@ public class Props {
 	public int getSearchRadiusForAddressSearch() {
 		return (properties == null) ? 0 : Integer.parseInt(properties.getProperty("SEARCH_BY_ADDRESS_RADIUS"));
 	}
-
 }

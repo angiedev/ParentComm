@@ -1,17 +1,26 @@
 package org.angiedev.parentcomm.web.form;
 
 import org.angiedev.parentcomm.model.SchoolLevel;
+import org.angiedev.parentcomm.model.SearchRadius;
+import org.angiedev.parentcomm.model.SearchType;
 
+/**
+ * Form data used to support users requests to search for schools 
+ * @author Angela Gordon
+ *
+ */
 public class SchoolFinderForm {
 
-	public static final int MAX_RADIUS = 1000000;
 	private String searchValue;
 	private double latitude;
 	private double longitude;
-	private int radius; 
-	private SchoolLevel filterType;
+	private SearchRadius radius; 
+	private SchoolLevel schoolLevel;
+	private SearchType searchType;
 	
 	public SchoolFinderForm() {
+		schoolLevel = SchoolLevel.ALL; // default to ALL schools
+		radius = SearchRadius.SMALL;
 	}
 
 	public String getSearchValue() {
@@ -38,23 +47,27 @@ public class SchoolFinderForm {
 		this.longitude = longitude;
 	}
 
-	public int getRadius() {
+	public SearchRadius getRadius() {
 		return radius;
 	}
 
-	public void setRadius(int radius) {
+	public void setRadius(SearchRadius radius) {
 		this.radius = radius;
 	}
-	
-	public void setMaxRadius() {
-		radius = MAX_RADIUS;
+
+	public SchoolLevel getSchoolLevel() {
+		return schoolLevel;
 	}
 
-	public SchoolLevel getFilterType() {
-		return filterType;
+	public void setSchoolLevel(SchoolLevel schoolLevel) {
+		this.schoolLevel = schoolLevel;
 	}
 
-	public void setFilterType(SchoolLevel filterType) {
-		this.filterType = filterType;
+	public SearchType getSearchType() {
+		return searchType;
+	}
+
+	public void setSearchType(SearchType searchType) {
+		this.searchType = searchType;
 	}
 }

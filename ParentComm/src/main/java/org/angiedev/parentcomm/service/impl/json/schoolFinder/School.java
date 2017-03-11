@@ -1,14 +1,14 @@
 package org.angiedev.parentcomm.service.impl.json.schoolFinder;
 
 /**
- * SchoolFinderSchool is a domain class used to consume the data from the 
+ * School is a domain class used to consume the data from the 
  * SchoolFinder REST Service.  The data returned from the API is in JSON.  Spring's 
  * rest template uses Jackson JSON processing library to translate this JSON data 
  * into a Java object.
  * <p>
  * @author Angela Gordon 
  */
-import org.angiedev.parentcomm.model.School;
+
 import org.angiedev.parentcomm.model.SchoolGrade;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -16,11 +16,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class SchoolFinderSchool extends School {
+public class School extends org.angiedev.parentcomm.model.School {
 
 	
 	@JsonCreator
-	public SchoolFinderSchool(@JsonProperty("name") String name,
+	public School(@JsonProperty("name") String name,
 			@JsonProperty("ncesId") String id,
 			@JsonProperty("streetAddr") String streetAddress,
 			@JsonProperty("city") String city,
